@@ -24,7 +24,7 @@ const BGC = "#0b0d10";
 
 const GLYPH = {
   H:["#.#","#.#","###","#.#","#.#"], E:["###","#..","###","#..","###"],
-  C:[".##","#..","#..","#..",".##"], O:[".#.","#.#","#.#","#.#",".#."],
+  C:[".##","#..","#..","#..",".##"], O:[".##.","#..#","#..#","#..#",".##."],
   N:["#..#","##.#","#.##","#..#","#..#"], G:[".##","#..","#.#","#.#",".##"],
   M:["#...#","##.##","#.#.#","#...#","#...#"], S:[".##","#..",".#.","..#","##."],
   I:["#","#","#","#","#"], F:["###","#..","##.","#..","#.."],
@@ -300,6 +300,7 @@ function draw(t){
 }
 
 let curTab = 0;
+let hBarI = null;
 const tabContent = document.getElementById("tabContent");
 const tip = document.getElementById("tip");
 
@@ -364,6 +365,7 @@ function buildFormationRows(){
       bar.className = "barBox";
       bar.innerHTML = "<i></i>";
       row.appendChild(bar);
+      hBarI = bar.querySelector("i");
       const rate = document.createElement("span");
       rate.className = "rateBig";
       rate.hidden = true;
@@ -423,7 +425,6 @@ function refreshTab(){
           rate.textContent = "~" + r.toFixed(1) + "/s";
         } else {
           bar.hidden = false; rate.hidden = true;
-          bar.querySelector("i").style.width = Math.min(100, spawnAcc*100) + "%";
         }
       }
     }
@@ -449,9 +450,16 @@ document.querySelectorAll(".tab:not(.lock)").forEach(b => {
   });
 });
 
+let wiping = false;
 function save(){
+  if (wiping) return;
   S.ts = Date.now();
   try{ localStorage.setItem(SAVE_KEY, JSON.stringify(S)); }catch(e){}
+}
+function wipe(){
+  wiping = true;
+  localStorage.removeItem(SAVE_KEY);
+  location.reload();
 }
 function load(){
   try{
@@ -488,8 +496,7 @@ const resetBtn = document.getElementById("reset");
 let resetArm = 0;
 resetBtn.addEventListener("pointerdown", () => {
   if (Date.now() - resetArm < 2000){
-    localStorage.removeItem(SAVE_KEY);
-    location.reload();
+    wipe();
   } else {
     resetArm = Date.now();
     resetBtn.classList.add("arm");
@@ -516,6 +523,8 @@ function frame(ts){
   resolveReactions(dt);
   refill();
   draw(ts/1000);
+  if (hBarI && hBarI.isConnected)
+    hBarI.style.transform = `scaleX(${Math.min(1, spawnAcc).toFixed(4)})`;
   requestAnimationFrame(frame);
 }
 
@@ -545,10 +554,7 @@ function dbgInit(){
     });
   });
   document.getElementById("dsave").addEventListener("pointerdown", save);
-  document.getElementById("dwipe").addEventListener("pointerdown", () => {
-    localStorage.removeItem(SAVE_KEY);
-    location.reload();
-  });
+  document.getElementById("dwipe").addEventListener("pointerdown", wipe);
   setInterval(() => {
     if (dbg.hidden) return;
     const drawnMax = Math.min(entities.length, DRAW_CAP);
