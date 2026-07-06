@@ -14,11 +14,31 @@ decisions, never labor. Watching is the core pleasure.
 - One vessel where ALL atoms live, drift, and REACT on proximity,
   automatically. Fun to watch is a design requirement.
 - Goal of phase 1: make as much Fe as possible.
-- UI: chamber view stays clean. UPGRADES and SPAWNING/progress live on
-  separate tabs. Two layout candidates in labs/sun-main-lab.html
-  (1 Console: full-bleed chamber, bottom icon dock / 2 Sidebar: permanent
-  left rail with ledger). PICK PENDING.
+- SHELL (resolved 2026-07-06): chamber ALWAYS VISIBLE on top, 5-tab panel
+  underneath. Console/Sidebar labs superseded.
 - Parked: valve upgrades that PREVENT chosen reactions (player steering).
+
+## Build v0.1 plan (until iron) - concise, revisable
+- T1 FORMATION (name pending): per-element rows. H row starts locked
+  (industry standard: dim + cost + pulse); one click activates it ->
+  progress bar -> visible H spawns. Bar swaps to ~/s readout once too fast
+  to animate. Other rows appear on discovery: sprite, count, ~/min.
+  Hover a row: its recipe (how many of the previous atoms).
+- H is the ONLY spawned atom; everything derives from it; ALL progression
+  upgrades multiply H spawn rate.
+- Rates: TRAILING WINDOW AVERAGE, shown per minute, display updates every
+  0.1s. Windows: H He = 1 min; C O = 2 min; Ne Mg Si Fe = 5 min. Before a
+  window fills, divide by elapsed instead.
+- T2 UPGRADES: 4 placeholder cards. Hover: description + current bonus ->
+  next bonus. Cost: spends H.
+- T3 T4 T5: locked. Features unlock little by little.
+- Chamber cap: 100 atoms DRAWN, heavier atoms take precedence; excess
+  exists invisibly (counts and reactions continue). One-time notification
+  at first overflow explains it.
+- Recipes (names and order real, quantities gameplay-scaled; lengthen the
+  ladder over tuning): He 4H · C 3He · O 1C+2He · Ne 1O+3He · Mg 1Ne+4He ·
+  Si 1Mg+5He · Fe 2Si.
+- Prestige: deferred until the flow is tested.
 
 ## The ladder (Phase A, the ALPHA LADDER - real physics, one rule:
 everything eats helium to climb)
