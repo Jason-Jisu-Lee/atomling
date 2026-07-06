@@ -21,7 +21,7 @@ body{ font-family:Consolas,"Cascadia Mono",monospace; color:#dfe3e8; user-select
 #panel{ height:clamp(220px, 36vh, 300px); border-top:2px solid rgba(240,243,239,.25);
   display:flex; flex-direction:column; background:#0b0d10; }
 #tabbar{ display:flex; gap:6px; padding:8px 10px 0; }
-.tab{ width:52px; height:36px; background:none; border:2px solid rgba(240,243,239,.25);
+.tab{ width:56px; height:44px; background:none; border:2px solid rgba(240,243,239,.25);
   cursor:pointer; display:flex; align-items:center; justify-content:center; }
 .tab.on{ background:#f2f3ef; border-color:#f2f3ef; }
 .tab.lock{ opacity:.35; cursor:default; }
@@ -62,3 +62,12 @@ body{ font-family:Consolas,"Cascadia Mono",monospace; color:#dfe3e8; user-select
   padding:8px 12px; font-size:12px; line-height:1.6; color:#dfe3e8; max-width:240px;
   pointer-events:none; letter-spacing:.5px; }
 #tip b{ color:#f2f3ef; }
+
+@media (max-width:620px){
+  #panel{ height:clamp(240px, 44vh, 340px); }
+  #ups{ grid-template-columns:repeat(2,1fr); }
+  .row{ gap:8px; padding:6px 8px; }
+  .row .cnt{ min-width:44px; font-size:14px; }
+  .row .permin{ min-width:auto; font-size:10px; }
+  .row .barBox{ min-width:50px; }
+}
