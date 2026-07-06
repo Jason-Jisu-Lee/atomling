@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Main Page Lab · two layouts, locked atoms</title>
+<style>
+  *{ box-sizing:border-box; }
+  body{ margin:0 auto; padding:20px 20px 80px; background:#08090b; color:#dfe3e8;
+    font-family:"Segoe UI",system-ui,sans-serif; max-width:1180px; }
+  h1{ font-size:22px; margin:8px 0 2px; }
+  header p{ color:#7c828a; font-size:13.5px; margin:0 0 18px; }
+  .cand{ margin:26px 0 44px; }
+  .cand h3{ margin:0 0 3px; font-size:16px; color:#e8e5da; }
+  .cand > p{ margin:0 0 10px; font-size:12.5px; color:#7c828a; }
+  .frame{ border-radius:14px; overflow:hidden; border:1px solid #1c2026;
+    box-shadow:0 12px 30px rgba(0,0,0,.5); }
+  .frame canvas{ display:block; width:100%; height:auto; image-rendering:pixelated; cursor:pointer; }
+  footer{ margin-top:28px; text-align:center; color:#7c828a; font-size:12.5px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Main Page Lab · two layouts, thirteen residents</h1>
+  <p>The full cast, two materials: fused solid, beyond-iron inverted. Sizes flat after iron. Both frames live: chambers run, tabs click, ledgers grow as elements are discovered.</p>
+</header>
+<div class="cand"><h3>The cast</h3><p>Fused H to Fe grow and stay solid; everything past the wall is inverted at iron size; the two the explosion makes wear a double rim.</p>
+<div class="frame"><canvas id="castCv" width="1140" height="120"></canvas></div></div>
+<div id="cands"></div>
+<footer>Throwaway lab. Tab icons: vessel, arrow, drop.</footer>
+
+<script>
+"use strict";
+const ELS = ["H","He","C","O","Ne","Mg","Si","Fe","Cu","Ag","Pb","Au","U"];
+const CELLS = { H:9, He:11, C:13, O:15, Ne:17, Mg:19, Si:21, Fe:25, Cu:25, Ag:25, Pb:25, Au:25, U:25 };
+const SPEED = { H:56, He:38, C:28, O:22, Ne:18, Mg:15, Si:12, Fe:8, Cu:7, Ag:6, Pb:5, Au:5, U:4 };
+const KLASS = { H:"solid", He:"solid", C:"solid", O:"solid", Ne:"solid", Mg:"solid", Si:"solid", Fe:"solid",
+  Cu:"invert", Ag:"invert", Pb:"invert", Au:"invert2", U:"invert2" };
+const INKC = "#f2f3ef";
+const BGC = "#0b0d10";
+const DIM = "rgba(240,243,239,.35)";
+const W = 1140, H = 560;
+const SC = 3;
+
+const GLYPH = {
+  H:["#.#","#.#","###","#.#","#.#"], E:["###","#..","###","#..","###"],
+  C:[".##","#..","#..","#..",".##"], O:[".#.","#.#","#.#","#.#",".#."],
+  N:["#..#","##.#","#.##","#..#","#..#"], G:[".##","#..","#.#","#.#",".##"],
+  M:["#...#","##.##","#.#.#","#...#","#...#"], S:[".##","#..",".#.","..#","##."],
+  I:["#","#","#","#","#"], F:["###","#..","##.","#..","#.."],
+  "0":["###","#.#","#.#","#.#","###"], "1":[".#.","##.",".#.",".#.","###"],
+  "2":["###","..#","###","#..","###"], "3":["###","..#","###","..#","###"],
+  "4":["#.#","#.#","###","..#","..#"], "5":["###","#..","###","..#","###"],
+  "6":["###","#..","###","#.#","###"], "7":["###","..#","..#","..#","..#"],
+  "8":["###","#.#","###","#.#","###"], "9":["###","#.#","###","..#","###"],
+  "/":["..#","..#",".#.","#..","#.."], "+":["...",".#.","###",".#.","..."],
+  U:["#.#","#.#","#.#","#.#","###"], A:[".#.","#.#","###","#.#","#.#"],
+  B:["##.","#.#","##.","#.#","##."], P:["##.","#.#","##.","#..","#.."],
+};
+const LETTERS = { H:["H"], He:["H","E"], C:["C"], O:["O"], Ne:["N","E"], Mg:["M","G"], Si:["S","I"], Fe:["F","E"],
+  Cu:["C","U"], Ag:["A","G"], Pb:["P","B"], Au:["A","U"], U:["U"] };
+const glyphW = g => GLYPH[g][0].length;
+
+function drawPix(ctx, str, x, y, s, color){
+  ctx.fillStyle = color || INKC;
+  let cx = x;
+  for (const ch of str){
+    const g = GLYPH[ch];
+    if (!g){ cx += 2*s; continue; }
+    g.forEach((row,ry)=>{
+      for (let rx=0;rx<row.length;rx++)
+        if (row[rx]==="#") ctx.fillRect(cx+rx*s, y+ry*s, s, s);
+    });
+    cx += (row0w(g)+1)*s;
+  }
+  return cx - x;
+}
+function row0w(g){ return g[0].length; }
+function pixW(str, s){
+  let w = 0;
+  for (const ch of str){ const g = GLYPH[ch]; w += (g ? row0w(g)+1 : 2); }
+  return (w-1)*s;
+}
+
+function letterCells(el){
+  const gs = LETTERS[el];
+  const w = gs.reduce((a,g)=>a+glyphW(g),0) + (gs.length-1);
+  const cells = [];
+  let x = 0;
+  gs.forEach((g,gi)=>{
+    GLYPH[g].forEach((row,y)=>{
+      for (let i=0;i<row.length;i++) if (row[i]==="#") cells.push([x+i, y+(gi===1?1:0)]);
+    });
+    x += glyphW(g)+1;
+  });
+  return { cells, w, h: gs.length>1 ? 6 : 5 };
+}
+function makeSprite(el){
+  const D = CELLS[el];
+  const cv = document.createElement("canvas");
+  cv.width = D; cv.height = D;
+  const x2 = cv.getContext("2d");
+  const c = (D-1)/2, rr = D/2 - .15;
+  const { cells, w, h } = letterCells(el);
+  const ox = Math.round((D-w)/2), oy = Math.round((D-h)/2);
+  const lset = new Set(cells.map(([x,y])=>(x+ox)+","+(y+oy)));
+  const klass = KLASS[el];
+  x2.fillStyle = INKC;
+  for (let y=0;y<D;y++) for (let x=0;x<D;x++){
+    const dx = x-c, dy = y-c;
+    const d2 = dx*dx+dy*dy;
+    const inBody = d2 <= rr*rr;
+    if (!inBody) continue;
+    const isLetter = lset.has(x+","+y);
+    if (klass === "solid"){
+      if (!isLetter) x2.fillRect(x,y,1,1);
+    } else if (klass === "invert"){
+      const onRim = d2 >= (rr-2)*(rr-2);
+      if (onRim || isLetter) x2.fillRect(x,y,1,1);
+    } else {
+      const onRim = d2 >= (rr-2)*(rr-2);
+      const onRim2 = d2 <= (rr-4)*(rr-4) && d2 >= (rr-5.6)*(rr-5.6);
+      if (onRim || onRim2 || isLetter) x2.fillRect(x,y,1,1);
+    }
+  }
+  return cv;
+}
+const SPR = {};
+for (const el of ELS) SPR[el] = makeSprite(el);
+
+const ICON = {
+  vessel:["#######","#.....#","#.#.#.#","#..#..#","#.#.#.#","#.....#","#######"],
+  arrow:["...#...","..###..",".#####.","#..#..#","...#...","...#...","...#..."],
+  drop:["...#...","..###..",".#####.",".#####.","#######",".#####.","..###.."],
+  magnet:["##..##","##..##","##..##","######",".####.","......"],
+  swirl:[".####.","#....#","#.##.#","#.#..#","#....#",".####."],
+  bolt:["...##.","..##..",".####.","..##..",".##...","......"],
+  burst:["#..#..#",".#.#.#.","..###..","#######","..###..",".#.#.#.","#..#..#"],
+};
+function drawIcon(ctx, name, x, y, s, color){
+  const g = ICON[name];
+  ctx.fillStyle = color || INKC;
+  g.forEach((row,ry)=>{
+    for (let rx=0;rx<row.length;rx++)
+      if (row[rx]==="#") ctx.fillRect(x+rx*s, y+ry*s, s, s);
+  });
+}
+
+function mkSim(){
+  const counts = {};
+  for (const el of ELS) counts[el] = 0;
+  return { P:[], spawnAcc:0, flashes:[], counts };
+}
+const RECIPES = [
+  { need:"Si", n:2, out:"Fe", r:76 },
+  { need:"Mg", n:1, need2:"He", out:"Si", r:70 },
+  { need:"Ne", n:1, need2:"He", out:"Mg", r:66 },
+  { need:"O", n:1, need2:"He", out:"Ne", r:62 },
+  { need:"C", n:1, need2:"He", out:"O", r:58 },
+  { need:"He", n:3, out:"C", r:64 },
+  { need:"H", n:4, out:"He", r:52 },
+];
+function react(S, set, out){
+  const grp = { set, out, t:0 };
+  set.forEach(p=>{ p.lock = true; p.grp = grp; });
+}
+function simStep(S, dt, V){
+  S.spawnAcc += dt;
+  if (S.spawnAcc > 1.1 && S.P.length < 30){
+    S.spawnAcc = 0;
+    S.P.push({ x:V.x0+14, y:V.y0+20+Math.random()*(V.y1-V.y0-40),
+      vx:40+Math.random()*40, vy:(Math.random()-.5)*60, el:"H", jx:0, jy:0, jn:0 });
+    S.counts.H++;
+  }
+  for (const p of S.P){
+    if (p.lock) continue;
+    p.x += p.vx*dt; p.y += p.vy*dt;
+    const sv = SPEED[p.el], m = Math.hypot(p.vx,p.vy)||1, want = sv/m;
+    p.vx += p.vx*(want-1)*dt*1.6; p.vy += p.vy*(want-1)*dt*1.6;
+    const r = CELLS[p.el]*SC/2 + 2;
+    if (p.x < V.x0+r){ p.x=V.x0+r; p.vx=Math.abs(p.vx); }
+    if (p.x > V.x1-r){ p.x=V.x1-r; p.vx=-Math.abs(p.vx); }
+    if (p.y < V.y0+r){ p.y=V.y0+r; p.vy=Math.abs(p.vy); }
+    if (p.y > V.y1-r){ p.y=V.y1-r; p.vy=-Math.abs(p.vy); }
+  }
+  for (const rec of RECIPES){
+    const free = el => S.P.filter(p=>p.el===el && !p.lock);
+    if (rec.need2){
+      const a = free(rec.need), b = free(rec.need2);
+      outer:
+      for (const pa of a) for (const pb of b){
+        if (pa!==pb && Math.hypot(pa.x-pb.x,pa.y-pb.y) < rec.r){ react(S,[pa,pb],rec.out); break outer; }
+      }
+    } else {
+      const pool = free(rec.need);
+      for (const seed of pool){
+        const near = pool.filter(p=>Math.hypot(p.x-seed.x,p.y-seed.y) < rec.r);
+        if (near.length >= rec.n){ react(S, near.slice(0,rec.n), rec.out); break; }
+      }
+    }
+  }
+  for (const g of S.P.filter(p=>p.lock)){
+    const cx = g.grp.set.reduce((a,p)=>a+p.x,0)/g.grp.set.length;
+    const cy = g.grp.set.reduce((a,p)=>a+p.y,0)/g.grp.set.length;
+    g.x += (cx-g.x)*dt*10; g.y += (cy-g.y)*dt*10;
+  }
+  const done = new Set();
+  for (const p of S.P) if (p.lock && !done.has(p.grp)){ p.grp.t += dt; done.add(p.grp); }
+  for (const grp of done){
+    if (grp.t >= .4){
+      const cx = grp.set.reduce((a,p)=>a+p.x,0)/grp.set.length;
+      const cy = grp.set.reduce((a,p)=>a+p.y,0)/grp.set.length;
+      for (const p of grp.set){ const i=S.P.indexOf(p); if (i>=0) S.P.splice(i,1); }
+      const a = Math.random()*7;
+      S.P.push({ x:cx, y:cy, vx:Math.cos(a)*30, vy:Math.sin(a)*30, el:grp.out, jx:0, jy:0, jn:0 });
+      S.counts[grp.out]++;
+      S.flashes.push({ x:cx, y:cy, t:0 });
+    }
+  }
+  for (const f of S.flashes) f.t += dt;
+  S.flashes = S.flashes.filter(f=>f.t<.45);
+}
+
+function jit(j, t){
+  if (t > j.jn){
+    j.jx = Math.floor(Math.random()*3)-1;
+    j.jy = Math.floor(Math.random()*3)-1;
+    j.jn = t + .035 + Math.random()*.035;
+  }
+}
+function blit(ctx, sp, x, y, s){
+  ctx.drawImage(sp, 0, 0, sp.width, sp.height,
+    Math.round(x - sp.width*s/2), Math.round(y - sp.height*s/2), sp.width*s, sp.height*s);
+}
+function drawChamber(ctx, S, V, t){
+  ctx.fillStyle = "rgba(240,243,239,.16)";
+  ctx.fillRect(V.x0, V.y0, V.x1-V.x0, SC);
+  ctx.fillRect(V.x0, V.y1, V.x1-V.x0, SC);
+  ctx.fillRect(V.x0, V.y0, SC, V.y1-V.y0);
+  ctx.fillRect(V.x1, V.y0, SC, V.y1-V.y0+SC);
+  for (const p of S.P){
+    jit(p, t);
+    blit(ctx, SPR[p.el], p.x + p.jx, p.y + p.jy, SC);
+  }
+  ctx.fillStyle = INKC;
+  for (const f of S.flashes){
+    const k = f.t/.45;
+    const r = Math.round(6+k*26);
+    const cx = Math.round(f.x), cy = Math.round(f.y);
+    ctx.globalAlpha = .6*(1-k);
+    ctx.fillRect(cx-r, cy-r, r*2, SC);
+    ctx.fillRect(cx-r, cy+r, r*2, SC);
+    ctx.fillRect(cx-r, cy-r, SC, r*2);
+    ctx.fillRect(cx+r, cy-r, SC, r*2+SC);
+    ctx.globalAlpha = 1;
+  }
+}
+function frameRect(ctx, x, y, w, h, on){
+  ctx.fillStyle = on ? INKC : "rgba(240,243,239,.3)";
+  ctx.fillRect(x, y, w, 2); ctx.fillRect(x, y+h-2, w, 2);
+  ctx.fillRect(x, y, 2, h); ctx.fillRect(x+w-2, y, 2, h);
+}
+const UPS_MOCK = [
+  { icon:"magnet", cost:20, el:"H" },
+  { icon:"swirl", cost:12, el:"He" },
+  { icon:"bolt", cost:8, el:"C" },
+  { icon:"burst", cost:30, el:"H" },
+];
+function drawUpgrades(ctx, S, x0, y0, w){
+  const cw = 250, ch = 130, gap = 30;
+  const cols = Math.max(1, Math.floor((w+gap)/(cw+gap)));
+  const totalW = cols*cw + (cols-1)*gap;
+  const ox = x0 + (w-totalW)/2;
+  UPS_MOCK.forEach((u,i)=>{
+    const cx = ox + (i%cols)*(cw+gap), cy = y0 + Math.floor(i/cols)*(ch+gap);
+    const afford = S.counts[u.el] >= u.cost;
+    frameRect(ctx, cx, cy, cw, ch, afford);
+    drawIcon(ctx, u.icon, cx+24, cy+ch/2-14, 4, afford ? INKC : DIM);
+    blit(ctx, SPR[u.el], cx+cw-96, cy+ch/2, 2);
+    drawPix(ctx, String(u.cost), cx+cw-64, cy+ch/2-7, 3, afford ? INKC : DIM);
+  });
+}
+function drawSpawn(ctx, S, x0, y0, w){
+  const bw = Math.min(560, w-80), bx = x0+(w-bw)/2, by = y0+40;
+  blit(ctx, SPR.H, bx-30, by+12, 3);
+  frameRect(ctx, bx, by, bw, 24, true);
+  const segs = 20, fill = Math.floor(segs * Math.min(1, S.spawnAcc/1.1));
+  ctx.fillStyle = INKC;
+  for (let i=0;i<fill;i++) ctx.fillRect(bx+5 + i*(bw-10)/segs, by+5, (bw-10)/segs - 3, 14);
+  drawPix(ctx, "1/2", bx+bw+16, by+5, 3, DIM);
+  const hy = by+70;
+  blit(ctx, SPR.He, bx-30, hy+12, 3);
+  frameRect(ctx, bx, hy, bw, 24, false);
+  drawPix(ctx, "0/2", bx+bw+16, hy+5, 3, "rgba(240,243,239,.2)");
+}
+
+const CANDS = [];
+function mkCand(title, blurb, layout, startTab){
+  const wrap = document.createElement("div");
+  wrap.className = "cand";
+  wrap.innerHTML = `<h3>${title}</h3><p>${blurb}</p>
+    <div class="frame"><canvas width="${W}" height="${H}"></canvas></div>`;
+  document.getElementById("cands").appendChild(wrap);
+  const cv = wrap.querySelector("canvas");
+  const ctx = cv.getContext("2d");
+  ctx.imageSmoothingEnabled = false;
+  const C = { cv, ctx, layout, tab:startTab, S: mkSim(), tabRects:[] };
+  cv.addEventListener("pointerdown", e => {
+    const r = cv.getBoundingClientRect();
+    const x = (e.clientX-r.left)/r.width*W, y = (e.clientY-r.top)/r.height*H;
+    C.tabRects.forEach((tr,i)=>{
+      if (x>=tr[0] && x<=tr[0]+tr[2] && y>=tr[1] && y<=tr[1]+tr[3]) C.tab = i;
+    });
+  });
+  CANDS.push(C);
+  return C;
+}
+
+function drawConsole(C, t){
+  const ctx = C.ctx;
+  ctx.fillStyle = BGC; ctx.fillRect(0,0,W,H);
+  const V = { x0:40, y0:76, x1:W-40, y1:H-88 };
+  simStep(C.S, 1/60, V);
+  let hx = 40;
+  for (const el of ELS){
+    const n = C.S.counts[el];
+    if (n === 0 && el !== "H") continue;
+    blit(ctx, SPR[el], hx+CELLS[el], 38, 2);
+    drawPix(ctx, String(n), hx + CELLS[el]*2 + 12, 31, 3);
+    hx += CELLS[el]*2 + pixW(String(n),3) + 34;
+  }
+  blit(ctx, SPR.Fe, W-96, 40, 3);
+  drawPix(ctx, String(C.S.counts.Fe), W-52, 32, 4);
+  if (C.tab === 0) drawChamber(ctx, C.S, V, t);
+  if (C.tab === 1) drawUpgrades(ctx, C.S, 60, 150, W-120);
+  if (C.tab === 2) drawSpawn(ctx, C.S, 60, 170, W-120);
+  const tabs = ["vessel","arrow","drop"];
+  C.tabRects = [];
+  const tw = 62, th = 46, gap = 18;
+  const ox = W/2 - (tabs.length*tw + (tabs.length-1)*gap)/2, oy = H-64;
+  tabs.forEach((ic,i)=>{
+    const x = ox + i*(tw+gap);
+    C.tabRects.push([x, oy, tw, th]);
+    if (C.tab === i){
+      ctx.fillStyle = INKC;
+      ctx.fillRect(x, oy, tw, th);
+      drawIcon(ctx, ic, x+tw/2-14, oy+th/2-14, 4, BGC);
+    } else {
+      frameRect(ctx, x, oy, tw, th, false);
+      drawIcon(ctx, ic, x+tw/2-14, oy+th/2-14, 4, DIM);
+    }
+  });
+}
+
+function drawSidebar(C, t){
+  const ctx = C.ctx;
+  ctx.fillStyle = BGC; ctx.fillRect(0,0,W,H);
+  const SBW = 200;
+  ctx.fillStyle = "rgba(240,243,239,.16)";
+  ctx.fillRect(SBW, 0, SC, H);
+  const tabs = ["vessel","arrow","drop"];
+  C.tabRects = [];
+  tabs.forEach((ic,i)=>{
+    const x = 24 + i*60, y = 22, s = 46;
+    C.tabRects.push([x, y, s, s]);
+    if (C.tab === i){
+      ctx.fillStyle = INKC;
+      ctx.fillRect(x, y, s, s);
+      drawIcon(ctx, ic, x+s/2-14, y+s/2-14, 4, BGC);
+    } else {
+      frameRect(ctx, x, y, s, s, false);
+      drawIcon(ctx, ic, x+s/2-14, y+s/2-14, 4, DIM);
+    }
+  });
+  ctx.fillStyle = "rgba(240,243,239,.16)";
+  ctx.fillRect(20, 92, SBW-40, 2);
+  const disc = ELS.filter(el => el !== "Fe" && (C.S.counts[el] > 0 || el === "H"));
+  disc.forEach((el,i)=>{
+    const col = i >= 7 ? 1 : 0;
+    const x = 44 + col*92, yy = 122 + (i - col*7)*48;
+    blit(ctx, SPR[el], x, yy, 2);
+    drawPix(ctx, String(C.S.counts[el]), x+34, yy-7, 3);
+  });
+  ctx.fillStyle = "rgba(240,243,239,.16)";
+  ctx.fillRect(20, H-96, SBW-40, 2);
+  blit(ctx, SPR.Fe, 56, H-52, 3);
+  drawPix(ctx, String(C.S.counts.Fe), 110, H-62, 4);
+  const V = { x0:SBW+40, y0:36, x1:W-36, y1:H-36 };
+  simStep(C.S, 1/60, V);
+  if (C.tab === 0) drawChamber(ctx, C.S, V, t);
+  if (C.tab === 1) drawUpgrades(ctx, C.S, SBW+60, 120, W-SBW-120);
+  if (C.tab === 2) drawSpawn(ctx, C.S, SBW+60, 150, W-SBW-120);
+}
+
+mkCand("1 · Console",
+  "Full-bleed chamber, counters floating along the top, iron called out big in the corner, and a three-icon dock at the bottom like a handheld. Tabs swap the whole floor.",
+  drawConsole, 0);
+mkCand("2 · Sidebar",
+  "A permanent left rail: tabs on top, the element ledger always visible, iron enthroned at the bottom. The chamber lives in the content area. This one starts on the upgrades tab; click the vessel icon to watch.",
+  drawSidebar, 1);
+
+const castCtx = document.getElementById("castCv").getContext("2d");
+castCtx.imageSmoothingEnabled = false;
+const castJ = ELS.map(()=>({jx:0,jy:0,jn:0}));
+function drawCast(t){
+  castCtx.fillStyle = BGC;
+  castCtx.fillRect(0,0,1140,120);
+  let x = 50;
+  ELS.forEach((el,i)=>{
+    const j = castJ[i];
+    jit(j, t);
+    blit(castCtx, SPR[el], x + CELLS[el]*1.5 + j.jx, 60 + j.jy, 3);
+    x += CELLS[el]*3 + 14;
+  });
+}
+
+function loop(){
+  const t = performance.now()/1000;
+  drawCast(t);
+  for (const C of CANDS) (C.layout)(C, t);
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>
