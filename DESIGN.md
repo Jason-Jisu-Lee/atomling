@@ -1,7 +1,8 @@
-# (Title TBD) - working title Second Sun
+# ATOMLING
 
 1-bit atom incremental. Desktop web first, itch.io then Steam.
-This file is the canonical design tracker. Rebuilt clean 2026-07-06.
+This file is the canonical design tracker. Title locked 2026-07-06.
+Repo: github.com/Jason-Jisu-Lee/atomling
 
 ## The game in one breath
 Atoms live in a chamber and react when close. Hydrogen drips in by itself;
@@ -82,8 +83,6 @@ everything eats helium to climb)
   the collection board). Every pull free, every pull could be anything.
 
 ## Open
-- TITLE (candidates: Until Iron / Eventually, Iron / Everything Eats
-  Helium / Star Stuff / The Little Furnace / Heavier / Second Sun).
 - Layout pick: Console vs Sidebar.
 - Numbers tuning at every tier. Phase B drip rates. Nova timing target
   (~20-40 min first run). Luck seasoning placement.
