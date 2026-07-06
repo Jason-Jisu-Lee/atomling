@@ -60,7 +60,7 @@ everything eats helium to climb)
 - Mg + He -> Si
 - Si + Si -> Fe (iron combines with nothing; it only accumulates)
 - Reaction scan heaviest-first (prevents helium hoarding starvation).
-- Spawning: 1 H per 2s base. Attention (hold on source) = x2.
+- Spawning: 1 H per 3s base.
 - ONE currency: atoms. Upgrades cost the element they belong to.
 - Core temperature = a COLOR/state gauge, never money.
 
@@ -101,8 +101,8 @@ everything eats helium to climb)
   glyphs incl. digits; letter is the atom). No faces, no anatomy, no words
   in frame - atoms, digits, icons only.
 - Shake: one screen pixel, ~25Hz, constant.
-- Player = attention + decisions. Hold = focus x2 (one at a time) or
-  ritual. Events are bonus-only; absence of reward, never penalty.
+- Player = attention + decisions, never labor. Events are bonus-only;
+  absence of reward, never penalty.
 - Procedural WebAudio only. Color earned slowly in testing.
 
 ## First five minutes (the hook engine)
@@ -120,7 +120,6 @@ everything eats helium to climb)
 - Different devices: pointer events, ~44px touch targets, mobile later.
 
 ## Open
-- Layout pick: Console vs Sidebar.
 - Numbers tuning at every tier. Phase B drip rates. Nova timing target
   (~20-40 min first run). Luck seasoning placement.
-- GitHub repo: user creates after title lock; push everything there.
+- Formation tab final name. Reset button placement/styling.

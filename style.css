@@ -66,6 +66,19 @@ body{ display:flex; align-items:center; justify-content:center; background:#0405
   pointer-events:none; letter-spacing:.5px; }
 #tip b{ color:#f2f3ef; }
 
+#debug{ position:fixed; right:10px; top:10px; width:240px; max-height:calc(100vh - 20px);
+  overflow-y:auto; background:#101216; border:1px solid #2a2e35; padding:10px 12px;
+  font-size:11px; color:#aeb7c0; z-index:90; }
+#debug .dhead{ font-size:11px; letter-spacing:3px; color:#e8c66a; margin-bottom:8px; }
+#debug pre{ margin:0 0 6px; font:inherit; line-height:1.7; color:#dfe3e8; white-space:pre-wrap; }
+#debug .dsec{ letter-spacing:2px; color:#6f7883; margin:8px 0 4px; }
+#debug .drow{ display:flex; gap:6px; flex-wrap:wrap; }
+#debug button{ font:inherit; font-size:11px; background:#1a1e24; color:#dfe3e8;
+  border:1px solid #2a2e35; padding:4px 10px; cursor:pointer; }
+#debug button.on{ border-color:#e8c66a; color:#e8c66a; }
+#dgrant{ display:grid; grid-template-columns:repeat(4,1fr); gap:6px; }
+#dgrant button{ padding:4px 2px; }
+
 @media (max-width:620px){
   #panel{ height:clamp(240px, 44vh, 340px); }
   #ups{ grid-template-columns:repeat(2,1fr); }

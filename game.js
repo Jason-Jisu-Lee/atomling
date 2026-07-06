@@ -73,6 +73,7 @@ for (const el of ELS) S.counts[el] = 0;
 let entities = [];
 let flashes = [];
 let spawnAcc = 0;
+let TSCALE = 1;
 let eid = 0;
 const hist = {};
 for (const el of ELS) hist[el] = [];
@@ -500,14 +501,14 @@ let lastSim = 0;
 function stepSim(){
   const now = performance.now();
   if (!lastSim) lastSim = now;
-  const dt = Math.min(2, (now-lastSim)/1000);
+  const dt = Math.min(2, (now-lastSim)/1000) * TSCALE;
   lastSim = now;
   if (dt > 0) simSpawn(dt);
 }
 let lastF = 0;
 function frame(ts){
   if (!lastF) lastF = ts;
-  const dt = Math.min(.05, (ts-lastF)/1000);
+  const dt = Math.min(.05, (ts-lastF)/1000) * TSCALE;
   lastF = ts;
   stepSim();
   physics(dt);
@@ -517,6 +518,52 @@ function frame(ts){
   draw(ts/1000);
   requestAnimationFrame(frame);
 }
+
+const dbg = document.getElementById("debug");
+function dbgToggle(force){
+  dbg.hidden = force !== undefined ? !force : !dbg.hidden;
+  if (TSCALE !== 1 && dbg.hidden) TSCALE = 1;
+}
+function dbgInit(){
+  const grant = document.getElementById("dgrant");
+  for (const el of ELS){
+    const b = document.createElement("button");
+    b.textContent = "+" + el;
+    b.addEventListener("pointerdown", () => {
+      const n = el === "H" ? 20 : 5;
+      S.counts[el] += n;
+      S.discovered[el] = true;
+      for (let i=0;i<n && entities.length<ENT_CAP;i++) spawnEntity(el);
+      buildFormationRows();
+    });
+    grant.appendChild(b);
+  }
+  dbg.querySelectorAll("[data-ts]").forEach(b => {
+    b.addEventListener("pointerdown", () => {
+      TSCALE = +b.dataset.ts;
+      dbg.querySelectorAll("[data-ts]").forEach(x => x.classList.toggle("on", x === b));
+    });
+  });
+  document.getElementById("dsave").addEventListener("pointerdown", save);
+  document.getElementById("dwipe").addEventListener("pointerdown", () => {
+    localStorage.removeItem(SAVE_KEY);
+    location.reload();
+  });
+  setInterval(() => {
+    if (dbg.hidden) return;
+    const drawnMax = Math.min(entities.length, DRAW_CAP);
+    const lines = [
+      `rate ${spawnRate().toFixed(2)}/s  ts x${TSCALE}`,
+      `entities ${entities.length}  drawn ${drawnMax}`,
+      ...ELS.filter(el=>S.counts[el]>0 || el==="H").map(el =>
+        `${el.padEnd(2)} ${String(S.counts[el]).padStart(6)}  ~${ratePerMin(el).toFixed(1)}/min`),
+    ];
+    document.getElementById("dstats").textContent = lines.join("\n");
+  }, 250);
+}
+dbgInit();
+document.addEventListener("keydown", e => { if (e.key === "`") dbgToggle(); });
+if (location.hash.includes("debug")) dbgToggle(true);
 
 cv = document.getElementById("chamber");
 ctx = cv.getContext("2d");
