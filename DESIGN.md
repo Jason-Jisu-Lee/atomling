@@ -102,6 +102,13 @@ everything eats helium to climb)
 - Minutes 4-5: the ladder's shape becomes visible (dark ledger slots =
   the collection board). Every pull free, every pull could be anything.
 
+## Screen contract
+- Must be fully functional at the itch embed size (~960x640) without
+  fullscreen; desktop fullscreen is the best-case, not the requirement.
+- Panel height clamps so the chamber keeps the majority of short screens;
+  atom sprite scale drops one step on short windows. dpr-aware always.
+- Different devices: pointer events, ~44px touch targets, mobile later.
+
 ## Open
 - Layout pick: Console vs Sidebar.
 - Numbers tuning at every tier. Phase B drip rates. Nova timing target

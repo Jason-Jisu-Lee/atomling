@@ -102,6 +102,7 @@ function baseRate(){
 }
 
 let cv, ctx, W, H, DPR;
+let SC = 3;
 const VES = { x0:0, y0:0, x1:0, y1:0 };
 function resize(){
   DPR = Math.min(2, window.devicePixelRatio||1);
@@ -110,6 +111,7 @@ function resize(){
   cv.width = Math.round(W*DPR); cv.height = Math.round(H*DPR);
   ctx.setTransform(DPR,0,0,DPR,0,0);
   ctx.imageSmoothingEnabled = false;
+  SC = H < 480 ? 2 : 3;
   VES.x0 = 14; VES.y0 = 14; VES.x1 = W-14; VES.y1 = H-14;
 }
 
@@ -175,7 +177,7 @@ function physics(dt){
     p.x += p.vx*dt; p.y += p.vy*dt;
     const sv = SPEED[p.el], m = Math.hypot(p.vx,p.vy)||1, want = sv/m;
     p.vx += p.vx*(want-1)*dt*1.6; p.vy += p.vy*(want-1)*dt*1.6;
-    const r = CELLS[p.el]*1.5 + 4;
+    const r = CELLS[p.el]*SC/2 + 4;
     if (p.x < VES.x0+r){ p.x=VES.x0+r; p.vx=Math.abs(p.vx); }
     if (p.x > VES.x1-r){ p.x=VES.x1-r; p.vx=-Math.abs(p.vx); }
     if (p.y < VES.y0+r){ p.y=VES.y0+r; p.vy=Math.abs(p.vy); }
@@ -276,7 +278,7 @@ function draw(t){
   }
   for (const p of drawn){
     jit(p, t);
-    const sp = SPR[p.el], s = 3;
+    const sp = SPR[p.el], s = SC;
     ctx.drawImage(sp, 0, 0, sp.width, sp.height,
       Math.round(p.x - sp.width*s/2) + p.jx, Math.round(p.y - sp.height*s/2) + p.jy,
       sp.width*s, sp.height*s);
