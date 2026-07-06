@@ -3,7 +3,10 @@
 html,body{ margin:0; padding:0; height:100%; background:#08090b; overflow:hidden; }
 body{ font-family:Consolas,"Cascadia Mono",monospace; color:#dfe3e8; user-select:none; }
 
-#game{ display:flex; flex-direction:column; height:100%; }
+body{ display:flex; align-items:center; justify-content:center; background:#040506; }
+#game{ display:flex; flex-direction:column; width:960px; height:640px;
+  position:fixed; left:50%; top:50%; background:#08090b;
+  border:1px solid rgba(240,243,239,.18); transform-origin:center; }
 #chamberWrap{ position:relative; flex:1; min-height:0; }
 #chamber{ position:absolute; inset:0; width:100%; height:100%; display:block; touch-action:none; }
 
@@ -18,7 +21,7 @@ body{ font-family:Consolas,"Cascadia Mono",monospace; color:#dfe3e8; user-select
 #reset.arm{ border-color:#f2f3ef; }
 #reset.arm::after{ background:#f2f3ef; }
 
-#panel{ height:clamp(220px, 36vh, 300px); border-top:2px solid rgba(240,243,239,.25);
+#panel{ height:260px; border-top:2px solid rgba(240,243,239,.25);
   display:flex; flex-direction:column; background:#0b0d10; }
 #tabbar{ display:flex; gap:6px; padding:8px 10px 0; }
 .tab{ width:56px; height:44px; background:none; border:2px solid rgba(240,243,239,.25);

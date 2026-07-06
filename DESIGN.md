@@ -17,6 +17,16 @@ decisions, never labor. Watching is the core pleasure.
 - SHELL (resolved 2026-07-06): chamber ALWAYS VISIBLE on top, 5-tab panel
   underneath. Console/Sidebar labs superseded.
 - Parked: valve upgrades that PREVENT chosen reactions (player steering).
+- Parked ACTIVE FEATURE (user, 2026-07-06): the player can GUIDE atoms
+  toward each other to help them combine. Hold-to-speed-up was cut.
+- Chamber = a FIXED small vessel (460x300), independent of window size.
+  Upgrades ENLARGE it later: bigger space = slower proximity (a real
+  tradeoff) paired with a huge bonus.
+- Desktop presentation: fixed 960x640 stage, centered, scales down
+  uniformly on smaller windows. Portrait-native phone arrangement = its
+  own pass later under the mobile-simultaneous law.
+- H spawn: 1 per 3 seconds base. Formation tab shows seconds-per-H;
+  per-minute rates live in the hover tooltips only.
 
 ## Build v0.1 plan (until iron) - concise, revisable
 - T1 FORMATION (name pending): per-element rows. H row starts locked

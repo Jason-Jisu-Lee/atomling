@@ -17,7 +17,7 @@ const RECIPE_OF = {};
 for (const r of RECIPES) RECIPE_OF[r.out] = r;
 const DRAW_CAP = 100;
 const ENT_CAP = 600;
-const BASE_SPAWN = 0.5;
+const BASE_SPAWN = 1/3;
 const SAVE_KEY = "atomling_v01";
 const INKC = "#f2f3ef";
 const BGC = "#0b0d10";
@@ -72,7 +72,6 @@ for (const el of ELS) S.counts[el] = 0;
 
 let entities = [];
 let flashes = [];
-let held = false;
 let spawnAcc = 0;
 let eid = 0;
 const hist = {};
@@ -92,27 +91,27 @@ const UPS = [
 function spawnRate(){
   let r = BASE_SPAWN;
   UPS.forEach((u,i)=>{ r *= u.mult(S.upgrades[i]); });
-  if (held) r *= 2;
   return r;
 }
-function baseRate(){
-  let r = BASE_SPAWN;
-  UPS.forEach((u,i)=>{ r *= u.mult(S.upgrades[i]); });
-  return r;
-}
+const baseRate = spawnRate;
 
 let cv, ctx, W, H, DPR;
 let SC = 3;
 const VES = { x0:0, y0:0, x1:0, y1:0 };
 function resize(){
   DPR = Math.min(2, window.devicePixelRatio||1);
-  const r = cv.getBoundingClientRect();
-  W = r.width; H = r.height;
+  W = cv.offsetWidth; H = cv.offsetHeight;
   cv.width = Math.round(W*DPR); cv.height = Math.round(H*DPR);
   ctx.setTransform(DPR,0,0,DPR,0,0);
   ctx.imageSmoothingEnabled = false;
-  SC = H < 480 ? 2 : 3;
-  VES.x0 = 14; VES.y0 = 14; VES.x1 = W-14; VES.y1 = H-14;
+  const bw = Math.min(460, W-28), bh = Math.min(300, H-28);
+  VES.x0 = Math.round((W-bw)/2); VES.y0 = Math.round((H-bh)/2);
+  VES.x1 = VES.x0 + bw; VES.y1 = VES.y0 + bh;
+}
+function fitStage(){
+  const s = Math.min(1, window.innerWidth/960, window.innerHeight/640);
+  document.getElementById("game").style.transform =
+    `translate(-50%,-50%) scale(${s.toFixed(4)})`;
 }
 
 function record(el){
@@ -261,6 +260,8 @@ function jit(j, t){
 function draw(t){
   ctx.fillStyle = BGC;
   ctx.fillRect(0,0,W,H);
+  ctx.fillStyle = "rgba(240,243,239,.03)";
+  ctx.fillRect(VES.x0, VES.y0, VES.x1-VES.x0, VES.y1-VES.y0);
   ctx.fillStyle = "rgba(240,243,239,.14)";
   ctx.fillRect(VES.x0, VES.y0, VES.x1-VES.x0, 2);
   ctx.fillRect(VES.x0, VES.y1, VES.x1-VES.x0, 2);
@@ -366,11 +367,12 @@ function buildFormationRows(){
       rate.className = "rateBig";
       rate.hidden = true;
       row.appendChild(rate);
+      const pm = document.createElement("span");
+      pm.className = "permin";
+      row.appendChild(pm);
     }
-    const pm = document.createElement("span");
-    pm.className = "permin";
-    row.appendChild(pm);
-    row.addEventListener("pointerenter", e => showTip(recipeText(el), e.clientX, e.clientY));
+    row.addEventListener("pointerenter", e =>
+      showTip(recipeText(el) + `<br>~${ratePerMin(el).toFixed(el==="H"?0:1)}/min`, e.clientX, e.clientY));
     row.addEventListener("pointerleave", hideTip);
     tabContent.appendChild(row);
   }
@@ -410,11 +412,11 @@ function refreshTab(){
     for (const row of rows){
       const el = row.dataset.el;
       row.querySelector(".cnt").textContent = S.counts[el];
-      row.querySelector(".permin").textContent = "~" + ratePerMin(el).toFixed(el==="H"?0:1) + "/min";
       if (el === "H"){
         const r = spawnRate();
         const bar = row.querySelector(".barBox");
         const rate = row.querySelector(".rateBig");
+        row.querySelector(".permin").textContent = (1/r).toFixed(1) + "s";
         if (r > 1.5){
           bar.hidden = true; rate.hidden = false;
           rate.textContent = "~" + r.toFixed(1) + "/s";
@@ -518,10 +520,9 @@ function frame(ts){
 
 cv = document.getElementById("chamber");
 ctx = cv.getContext("2d");
+fitStage();
 resize();
-window.addEventListener("resize", resize);
-cv.addEventListener("pointerdown", () => held = true);
-window.addEventListener("pointerup", () => held = false);
+window.addEventListener("resize", () => { fitStage(); resize(); });
 document.addEventListener("visibilitychange", () => { if (document.hidden) save(); });
 setInterval(() => { if (S.activated && performance.now()-lastSim > 700) stepSim(); }, 800);
 setInterval(refreshTab, 100);
