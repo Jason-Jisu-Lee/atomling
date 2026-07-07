@@ -113,11 +113,13 @@ everything eats helium to climb)
   the collection board). Every pull free, every pull could be anything.
 
 ## Screen contract
-- Must be fully functional at the itch embed size (~960x640) without
-  fullscreen; desktop fullscreen is the best-case, not the requirement.
-- Panel height clamps so the chamber keeps the majority of short screens;
-  atom sprite scale drops one step on short windows. dpr-aware always.
-- Different devices: pointer events, ~44px touch targets, mobile later.
+- 16:9 LAW: authored at 960x540 logical. Uniform integer upscale on big
+  screens (1080p fullscreen = exactly x2, 4K = x4), letterbox any
+  remainder, fractional shrink only below x1. Canvas re-rasterizes at
+  device resolution so pixels stay crisp at every scale.
+- itch embed 960x540 + fullscreen button; fully functional un-fullscreened.
+- Different devices: pointer events, 44px touch targets, portrait-native
+  phone arrangement later under the mobile-simultaneous law.
 
 ## Open
 - Numbers tuning at every tier. Phase B drip rates. Nova timing target

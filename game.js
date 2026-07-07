@@ -30,6 +30,7 @@ const GLYPH = {
   I:["#","#","#","#","#"], F:["###","#..","##.","#..","#.."],
 };
 const LETTERS = { H:["H"], He:["H","E"], C:["C"], O:["O"], Ne:["N","E"], Mg:["M","G"], Si:["S","I"], Fe:["F","E"] };
+const NAMES = { H:"Hydrogen", He:"Helium", C:"Carbon", O:"Oxygen", Ne:"Neon", Mg:"Magnesium", Si:"Silicon", Fe:"Iron" };
 const glyphW = g => GLYPH[g][0].length;
 
 function letterCells(el){
@@ -98,21 +99,26 @@ const baseRate = spawnRate;
 
 let cv, ctx, W, H, DPR;
 let SC = 3;
+let STAGEK = 1;
 const VES = { x0:0, y0:0, x1:0, y1:0 };
 function resize(){
   DPR = Math.min(2, window.devicePixelRatio||1);
   W = cv.offsetWidth; H = cv.offsetHeight;
-  cv.width = Math.round(W*DPR); cv.height = Math.round(H*DPR);
-  ctx.setTransform(DPR,0,0,DPR,0,0);
+  const px = DPR * STAGEK;
+  cv.width = Math.round(W*px); cv.height = Math.round(H*px);
+  ctx.setTransform(px,0,0,px,0,0);
   ctx.imageSmoothingEnabled = false;
-  const bw = Math.min(460, W-28), bh = Math.min(300, H-28);
+  SC = H < 240 ? 2 : 3;
+  const bw = Math.min(440, W-28), bh = Math.min(280, H-28);
   VES.x0 = Math.round((W-bw)/2); VES.y0 = Math.round((H-bh)/2);
   VES.x1 = VES.x0 + bw; VES.y1 = VES.y0 + bh;
 }
 function fitStage(){
-  const s = Math.min(1, window.innerWidth/960, window.innerHeight/640);
+  let k = Math.min(window.innerWidth/960, window.innerHeight/540);
+  k = k >= 1 ? Math.floor(k) : Math.max(.3, k);
+  STAGEK = k;
   document.getElementById("game").style.transform =
-    `translate(-50%,-50%) scale(${s.toFixed(4)})`;
+    `translate(-50%,-50%) scale(${k.toFixed(4)})`;
 }
 
 function record(el){
@@ -305,10 +311,10 @@ const tabContent = document.getElementById("tabContent");
 const tip = document.getElementById("tip");
 
 function recipeText(el){
-  if (el === "H") return "<b>H</b> · the beginning. everything is made from it";
+  if (el === "H") return `<b>${NAMES[el]}</b>`;
   const rec = RECIPE_OF[el];
   const parts = Object.entries(rec.parts).map(([e,n])=>`${n} ${e}`).join(" + ");
-  return `<b>${el}</b> · forms from ${parts}`;
+  return `<b>${NAMES[el]}</b><br>${parts} -> ${el}`;
 }
 function showTip(html, x, y){
   tip.innerHTML = html;
@@ -375,7 +381,7 @@ function buildFormationRows(){
       row.appendChild(pm);
     }
     row.addEventListener("pointerenter", e =>
-      showTip(recipeText(el) + `<br>~${ratePerMin(el).toFixed(el==="H"?0:1)}/min`, e.clientX, e.clientY));
+      showTip(recipeText(el) + `<br>${ratePerMin(el).toFixed(el==="H"?0:1)}/min`, e.clientX, e.clientY));
     row.addEventListener("pointerleave", hideTip);
     tabContent.appendChild(row);
   }
@@ -422,7 +428,7 @@ function refreshTab(){
         row.querySelector(".permin").textContent = (1/r).toFixed(1) + "s";
         if (r > 1.5){
           bar.hidden = true; rate.hidden = false;
-          rate.textContent = "~" + r.toFixed(1) + "/s";
+          rate.textContent = r.toFixed(1) + "/s";
         } else {
           bar.hidden = false; rate.hidden = true;
         }
