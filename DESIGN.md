@@ -19,9 +19,9 @@ decisions, never labor. Watching is the core pleasure.
 - Parked: valve upgrades that PREVENT chosen reactions (player steering).
 - Parked ACTIVE FEATURE (user, 2026-07-06): the player can GUIDE atoms
   toward each other to help them combine. Hold-to-speed-up was cut.
-- Chamber = a FIXED small vessel (460x300), independent of window size.
-  Upgrades ENLARGE it later: bigger space = slower proximity (a real
-  tradeoff) paired with a huge bonus.
+- Chamber = the full stage width from the start (user 2026-07-06; the
+  small-vessel + enlarge-upgrade idea is DROPPED). The counterweight to
+  the big space is the planned ACTIVE guiding mechanism.
 - Desktop presentation: fixed 960x640 stage, centered, scales down
   uniformly on smaller windows. Portrait-native phone arrangement = its
   own pass later under the mobile-simultaneous law.
@@ -63,6 +63,21 @@ everything eats helium to climb)
 - Spawning: 1 H per 3s base.
 - ONE currency: atoms. Upgrades cost the element they belong to.
 - Core temperature = a COLOR/state gauge, never money.
+
+## Progression doctrine: bounded axes (2026-07-06)
+Incrementals explode because one number compounds forever. Atomling
+instead upgrades SEVERAL axes, each with a natural ceiling, so progress =
+opening new axes, not inflating one. Numbers stay small and watchable
+(atoms on screen, never 1e47).
+- Spawn rate (H/s): the only raw faucet; gentle curve, rising costs.
+- Reaction radius: atoms find partners from farther; ceiling = vessel.
+- Reaction speed: converge/lock time shrinks; ceiling = instant.
+- Parallelism: how many reactions can run at once; ceiling = population.
+- Guidance (active): player pull strength/area; skill, not inflation.
+- Recipe efficiency: rare step-changes (4H->He becomes 3H->He), finite.
+The FEELING: a pot coming to boil - density rises, reactions chain,
+the chamber gets visibly busier; discovery beats (new element, new row)
+are the milestones; first Fe ~20-40 min is the pacing target.
 
 ## Per-rung upgrade families (each a different mechanic, paid in its element)
 - H: GRAVITY (pull rate, reach) - base automation.

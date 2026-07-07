@@ -109,7 +109,7 @@ function resize(){
   ctx.setTransform(px,0,0,px,0,0);
   ctx.imageSmoothingEnabled = false;
   SC = H < 240 ? 2 : 3;
-  const bw = Math.min(440, W-28), bh = Math.min(280, H-28);
+  const bw = W-28, bh = H-28;
   VES.x0 = Math.round((W-bw)/2); VES.y0 = Math.round((H-bh)/2);
   VES.x1 = VES.x0 + bw; VES.y1 = VES.y0 + bh;
 }
